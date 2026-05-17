@@ -19,10 +19,15 @@ const SkillCard = ({
 	title,
 }: SkillRecord) => {
 	const [copied, setCopied] = React.useState(false);
-	const handleCopy = () => {
-		navigator.clipboard.writeText(installCommand);
-		setCopied(true);
-		setTimeout(() => setCopied(false), 2000);
+	const handleCopy = async () => {
+		try {
+			await navigator.clipboard.writeText(installCommand);
+			setCopied(true);
+			setTimeout(() => setCopied(false), 2000);
+		} catch (error) {
+			setCopied(false);
+			console.error("Failed to copy", error);
+		}
 	};
 	return (
 		<article className="skill-card">
@@ -52,7 +57,11 @@ const SkillCard = ({
 						/>
 						<div className="author-copy">
 							<p>Zeenat</p>
-							<p>{new Date(createdAt as string).toLocaleDateString()}</p>
+							<p>
+								{createdAt
+									? new Date(createdAt).toLocaleDateString()
+									: "Unknown date"}
+							</p>
 						</div>
 					</div>
 					<p className="category">{category}</p>
