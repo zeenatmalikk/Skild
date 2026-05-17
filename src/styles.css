@@ -589,7 +589,7 @@
     }
 
     .open {
-      @apply flex items-center gap-1 text-xs font-semibold text-text-muted transition-colors hover:text-white;
+      @apply flex items-center gap-1 text-xs font-semibold text-text-muted transition-colors hover:text-primary;
     }
 
     .save {
