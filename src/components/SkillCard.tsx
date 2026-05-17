@@ -32,13 +32,13 @@ const SkillCard = ({
 	return (
 		<article className="skill-card">
 			<Link
-				to={`/skills/${title}`}
+				to={`/skills`}
 				tabIndex={-1}
 				aria-label={`Open skill ${title}`}
 				className="overlay"
 			/>
 			<div className="chrome">
-				<div className="chrom-bar">
+				<div className="chrome-bar">
 					<div className="lights">
 						<div className="light red" />
 						<div className="light amber" />
@@ -67,7 +67,7 @@ const SkillCard = ({
 					<p className="category">{category}</p>
 				</div>
 				<div className="summary">
-					<Link to={`/skills/${title}`} className="title-link">
+					<Link to={`/skills`} className="title-link">
 						<h3>{title}</h3>
 					</Link>
 					<p>{description}</p>
