@@ -7,6 +7,7 @@ import {
 	Copy,
 	MessageSquare,
 } from "lucide-react";
+import { usePostHog } from "posthog-js/react";
 import React from "react";
 
 const SkillCard = ({
@@ -18,15 +19,22 @@ const SkillCard = ({
 	tags,
 	title,
 }: SkillRecord) => {
+	const posthog = usePostHog();
 	const [copied, setCopied] = React.useState(false);
 	const handleCopy = async () => {
 		try {
 			await navigator.clipboard.writeText(installCommand);
 			setCopied(true);
 			setTimeout(() => setCopied(false), 2000);
+			posthog.capture("skill_install_command_copied", {
+				skill_title: title,
+				skill_category: category,
+				install_command: installCommand,
+			});
 		} catch (error) {
 			setCopied(false);
 			console.error("Failed to copy", error);
+			posthog.captureException(error);
 		}
 	};
 	return (
@@ -102,6 +110,12 @@ const SkillCard = ({
 							to={`/skills/${title}`}
 							className="open"
 							title={`Open skill ${title}`}
+							onClick={() =>
+								posthog.capture("skill_card_opened", {
+									skill_title: title,
+									skill_category: category,
+								})
+							}
 						>
 							<span>Open</span>
 							<ArrowUpRight size={14} />

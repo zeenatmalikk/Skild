@@ -16,7 +16,7 @@ function Home() {
 					</h1>
 					<p>
 						A high-performance registry for procedural agent skills. Discover,
-						publish and operate reusable aget capabilities from a route-driven
+						publish and operate reusable agent capabilities from a route-driven
 						workspace.
 					</p>
 				</div>

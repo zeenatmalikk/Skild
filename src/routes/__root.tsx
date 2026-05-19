@@ -1,4 +1,4 @@
-import { ClerkProvider } from '@clerk/tanstack-react-start'
+import { ClerkProvider, useUser } from "@clerk/tanstack-react-start";
 import { TanStackDevtools } from "@tanstack/react-devtools";
 import type { QueryClient } from "@tanstack/react-query";
 import {
@@ -7,6 +7,8 @@ import {
 	Scripts,
 } from "@tanstack/react-router";
 import { TanStackRouterDevtoolsPanel } from "@tanstack/react-router-devtools";
+import { PostHogProvider, usePostHog } from "posthog-js/react";
+import { useEffect } from "react";
 import Crosshair from "#/components/Crosshair";
 import Navbar from "#/components/Navbar";
 import TanStackQueryDevtools from "../integrations/tanstack-query/devtools";
@@ -45,6 +47,25 @@ export const Route = createRootRouteWithContext<MyRouterContext>()({
 	shellComponent: RootDocument,
 });
 
+function PostHogIdentifier() {
+	const { user, isLoaded } = useUser();
+	const posthog = usePostHog();
+
+	useEffect(() => {
+		if (!isLoaded) return;
+		if (user) {
+			posthog.identify(user.id, {
+				email: user.primaryEmailAddress?.emailAddress ?? undefined,
+				name: user.fullName ?? undefined,
+			});
+		} else {
+			posthog.reset();
+		}
+	}, [isLoaded, user, posthog]);
+
+	return null;
+}
+
 function RootDocument({ children }: { children: React.ReactNode }) {
 	return (
 		<html lang="en">
@@ -52,34 +73,46 @@ function RootDocument({ children }: { children: React.ReactNode }) {
 				<HeadContent />
 			</head>
 			<body className="font-sans antialiased wrap-anywhere">
-				<ClerkProvider>
-					<div id="root-layout">
-						<header>
-							<div className="frame">
-								<Navbar />
-								<Crosshair/>
-								<Crosshair/>
-							</div>
-						</header>
-            <main>
-              <div className="frame">
-                {children}
-              </div>
-            </main>
-					</div>
-					<TanStackDevtools
-						config={{
-							position: "bottom-right",
-						}}
-						plugins={[
-							{
-								name: "Tanstack Router",
-								render: <TanStackRouterDevtoolsPanel />,
-							},
-							TanStackQueryDevtools,
-						]}
-					/>
-				</ClerkProvider>
+				<PostHogProvider
+					apiKey={import.meta.env.VITE_PUBLIC_POSTHOG_KEY}
+					options={{
+						api_host: "/ingest",
+						ui_host:
+							import.meta.env.VITE_PUBLIC_POSTHOG_HOST ||
+							"https://us.posthog.com",
+						defaults: "2025-05-24",
+						capture_exceptions: true,
+						debug: import.meta.env.DEV,
+					}}
+				>
+					<ClerkProvider>
+						<div id="root-layout">
+							<header>
+								<div className="frame">
+									<Navbar />
+									<Crosshair />
+									<Crosshair />
+								</div>
+							</header>
+							<main>
+								<div className="frame">{children}</div>
+							</main>
+						</div>
+						<TanStackDevtools
+							config={{
+								position: "bottom-right",
+							}}
+							plugins={[
+								{
+									name: "Tanstack Router",
+									render: <TanStackRouterDevtoolsPanel />,
+								},
+								TanStackQueryDevtools,
+							]}
+						/>
+						<PostHogIdentifier />
+					</ClerkProvider>
+				</PostHogProvider>
 				<Scripts />
 			</body>
 		</html>
